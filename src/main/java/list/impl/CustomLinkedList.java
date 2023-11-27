@@ -12,6 +12,8 @@ import java.util.NoSuchElementException;
  * @param <E> the type of elements in this list
  */
 public class CustomLinkedList<E> implements CustomList<E> {
+    private static final String REQUEST_INDEX = "Requested index";
+    private static final String BUT_SIZE = ", but size: ";
     private Node<E> head;
     private int size;
 
@@ -50,7 +52,7 @@ public class CustomLinkedList<E> implements CustomList<E> {
     @Override
     public void add(int index, E element) {
         if (index < 0 || index > size) {
-            throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
+            throw new IndexOutOfBoundsException(REQUEST_INDEX + index + BUT_SIZE + size);
         }
         if (index == 0) {
             Node<E> newNode = new Node<>(element);
@@ -71,7 +73,7 @@ public class CustomLinkedList<E> implements CustomList<E> {
     @Override
     public E get(int index) {
         if (index < 0 || index >= size) {
-            throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
+            throw new IndexOutOfBoundsException(REQUEST_INDEX + index + BUT_SIZE + size);
         }
         Node<E> current = head;
         for (int i = 0; i < index; i++) {
@@ -118,7 +120,7 @@ public class CustomLinkedList<E> implements CustomList<E> {
     @Override
     public E remove(int index) {
         if (index < 0 || index >= size) {
-            throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
+            throw new IndexOutOfBoundsException(REQUEST_INDEX + index + BUT_SIZE + size);
         }
         E removedData;
         if (index == 0) {
@@ -219,6 +221,17 @@ public class CustomLinkedList<E> implements CustomList<E> {
     /**
      * Sorts this list according to the order induced by the specified comparator.
      * This implementation uses a variation of the merge sort algorithm to achieve stable sorting.
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    public void sort() {
+        Comparator<E> naturalOrder = (Comparator<E>) Comparator.naturalOrder();
+        sort(naturalOrder);
+    }
+
+    /**
+     * Sorts this list according to the order induced by the specified comparator.
+     * This implementation uses a variation of the merge sort algorithm to achieve stable sorting.
      *
      * @param comparator the comparator to determine the order of this list
      */
@@ -301,4 +314,24 @@ public class CustomLinkedList<E> implements CustomList<E> {
         return size;
     }
 
+    /**
+     * Returns a string representation of the list.
+     *
+     * @return a string representation of the list
+     */
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("[");
+        Node<E> current = head;
+        while (current != null) {
+            sb.append(current.data);
+            if (current.next != null) {
+                sb.append(", ");
+            }
+            current = current.next;
+        }
+        sb.append("]");
+        return sb.toString();
+    }
 }

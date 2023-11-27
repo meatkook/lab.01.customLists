@@ -55,6 +55,11 @@ public interface CustomList<E> extends Iterable<E> {
 
     /**
      * Sorts the list according to the order induced by the specified comparator.
+     */
+    void sort();
+
+    /**
+     * Sorts the list according to the order induced by the specified comparator.
      *
      * @param comparator the comparator to determine the order of the list
      */
@@ -74,4 +79,11 @@ public interface CustomList<E> extends Iterable<E> {
      * @return an array containing all the elements in the list
      */
     Object[] toArray();
+
+    /**
+     * Returns a string representation of the list.
+     *
+     * @return a string representation of the list
+     */
+    String toString();
 }

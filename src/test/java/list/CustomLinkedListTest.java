@@ -4,7 +4,10 @@ import list.impl.CustomArrayList;
 import list.impl.CustomLinkedList;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CustomLinkedListTest {
 
@@ -85,8 +88,8 @@ public class CustomLinkedListTest {
     }
 
     @Test
-    public void testSort() {
-        CustomLinkedList<Integer> list = new CustomLinkedList<>();
+    public void testSortInteger() {
+        CustomList<Integer> list = new CustomLinkedList<>();
         list.add(20);
         list.add(19);
         list.add(17);
@@ -94,10 +97,56 @@ public class CustomLinkedListTest {
         list.add(14);
         list.add(12);
         list.add(21);
-        list.add(0);
+        list.add(22);
+        list.add(1);
         list.sort(Integer::compareTo);
-        assertEquals(0, list.get(0));
+        assertEquals(1, list.get(0));
         assertEquals(14, list.get(2));
         assertEquals(21, list.get(7));
+    }
+
+    @Test
+    public void testSortString() {
+        CustomList<String> stringList = new CustomLinkedList<>();
+        stringList.add("Banana");
+        stringList.add("Apple");
+        stringList.add("kumquat");
+        stringList.add("Kivy");
+        stringList.add("Carrot");
+        stringList.sort();
+        assertEquals("Apple", stringList.get(0));
+        assertEquals("Banana", stringList.get(1));
+        assertEquals("Carrot", stringList.get(2));
+        assertEquals("Kivy", stringList.get(3));
+        assertEquals("kumquat", stringList.get(4));
+    }
+
+    @Test
+    void testMixed() {
+        CustomList<String> customLinkedList = new CustomLinkedList<>();
+        customLinkedList.add("21");
+        customLinkedList.add("32");
+        customLinkedList.add("13");
+        customLinkedList.add("1");
+        customLinkedList.add("2");
+        customLinkedList.add("3");
+        customLinkedList.add("321");
+        customLinkedList.add("432");
+        customLinkedList.add("513");
+        customLinkedList.add("61");
+        customLinkedList.add("52");
+        customLinkedList.add("345");
+
+        assertEquals("32", customLinkedList.get(1));
+        customLinkedList.remove(1);
+        assertEquals("13", customLinkedList.get(1));
+        // Before sort
+        assertEquals("[21, 13, 1, 2, 3, 321, 432, 513, 61, 52, 345]", customLinkedList.toString());
+        // After sort
+        customLinkedList.sort(String::compareTo);
+        assertEquals("[1, 13, 2, 21, 3, 321, 345, 432, 513, 52, 61]", customLinkedList.toString());
+        // After clear
+        customLinkedList.clear();
+        assertEquals("[]", customLinkedList.toString());
     }
 }

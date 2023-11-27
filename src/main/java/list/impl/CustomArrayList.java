@@ -1,8 +1,11 @@
 package list.impl;
 
 import list.CustomList;
-
-import java.util.*;
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.Iterator;
+import java.util.Spliterator;
+import java.util.Comparator;
 import java.util.function.Consumer;
 
 /**
@@ -10,6 +13,8 @@ import java.util.function.Consumer;
  @param <E> the type of elements in this list
  */
 public class CustomArrayList<E> implements CustomList<E> {
+    private static final String REQUEST_INDEX = "Requested index";
+    private static final String BUT_SIZE = ", but size: ";
     private static final int DEFAULT_CAPACITY = 7;
     private Object[] elements;
     private int size;
@@ -46,7 +51,7 @@ public class CustomArrayList<E> implements CustomList<E> {
     @Override
     public void add(int index, E element) {
         if (index < 0 || index > size) {
-            throw new IndexOutOfBoundsException("Requested index: " + index + ", but size: " + size);
+            throw new IndexOutOfBoundsException(REQUEST_INDEX + index + BUT_SIZE + size);
         }
         if (size == elements.length) {
             increaseCapacity();
@@ -67,7 +72,7 @@ public class CustomArrayList<E> implements CustomList<E> {
     @Override
     public E get(int index) {
         if (index < 0 || index >= size) {
-            throw new IndexOutOfBoundsException("Requested index: " + index + ", but size: " + size);
+            throw new IndexOutOfBoundsException(REQUEST_INDEX + index + BUT_SIZE + size);
         }
         return (E) elements[index];
     }
@@ -241,6 +246,17 @@ public class CustomArrayList<E> implements CustomList<E> {
     /**
      * Sorts this list according to the order induced by the specified comparator.
      * This implementation uses a variation of the merge sort algorithm to achieve stable sorting.
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    public void sort() {
+        Comparator<E> naturalOrder = (Comparator<E>) Comparator.naturalOrder();
+        sort(naturalOrder);
+    }
+
+    /**
+     * Sorts this list according to the order induced by the specified comparator.
+     * This implementation uses a variation of the merge sort algorithm to achieve stable sorting.
      *
      * @param comparator the comparator to determine the order of the list
      */
@@ -250,53 +266,65 @@ public class CustomArrayList<E> implements CustomList<E> {
             return;
         }
 
-        Object[] temp = new Object[size];
-        int blockSize = 1;
+        Object[] inputArray = this.elements;
+        Object[] outputArray = new Object[size];
+        Object[] tempArray;
 
-        while (blockSize < size) {
-            int start = 0;
-            while (start < size) {
-                int mid = start + blockSize;
-                int end = Math.min(start + 2 * blockSize, size);
-                merge(comparator, temp, start, mid, end);
-                start += 2 * blockSize;
+        for (int width = 1; width < size; width *= 2) {
+            splitAndMerge(inputArray, outputArray, width, comparator);
+            tempArray = inputArray;
+            inputArray = outputArray;
+            outputArray = tempArray;
+        }
+        if (inputArray != this.elements) {
+            System.arraycopy(inputArray, 0, this.elements, 0, size);
+        }
+    }
+
+    private void splitAndMerge(Object[] inputArray, Object[] outputArray, int width, Comparator<? super E> comparator){
+        for (int currentLeft = 0; currentLeft < size; currentLeft += 2 * width) {
+            int rightEnd = Math.min(currentLeft + 2 * width, size);
+            int leftEnd = Math.min(currentLeft + width, size);
+            merge(inputArray, outputArray, currentLeft, leftEnd, rightEnd, comparator);
+        }
+    }
+
+
+    @SuppressWarnings("unchecked")
+    private void merge(Object[] inputArray, Object[] outputArray, int left, int right, int end, Comparator<? super E> comparator) {
+        int leftIndex = left;
+        int rightIndex = right;
+        for (int currentInd = left; currentInd < end; currentInd++) {
+            if (leftIndex < right && (rightIndex >= end || comparator.compare((E) inputArray[leftIndex], (E) inputArray[rightIndex]) <= 0)) {
+                outputArray[currentInd] = inputArray[leftIndex++];
+            } else {
+                outputArray[currentInd] = inputArray[rightIndex++];
             }
-
-            System.arraycopy(temp, 0, elements, 0, size);
-            blockSize *= 2;
         }
     }
 
     /**
-     * Merges two sorted portions of the array into a single sorted portion.
+     * Returns a string representation of the list.
      *
-     * @param comparator the comparator to compare elements
-     * @param temp      the temporary array used for merging
-     * @param start     the start index of the first portion
-     * @param mid       the end index of the first portion and start index of the second portion
-     * @param end       the end index of the second portion
+     * @return a string representation of the list
      */
-    @SuppressWarnings("unchecked")
-    private void merge(Comparator<? super E> comparator, Object[] temp, int start, int mid, int end) {
-        int i = start;
-        int j = mid;
-        int index = start;
+    @Override
+    public String toString() {
+        if (size == 0) {
+            return "[]";
+        }
 
-        while (i < mid && j < end) {
-            if (comparator.compare((E) elements[i], (E) elements[j]) <= 0) {
-                temp[index++] = elements[i++];
-            } else {
-                temp[index++] = elements[j++];
+        StringBuilder sb = new StringBuilder();
+        sb.append('[');
+        for (int i = 0; i < size; i++) {
+            E element = get(i);
+            sb.append(element);
+            if (i < size - 1) {
+                sb.append(", ");
             }
         }
-
-        while (i < mid) {
-            temp[index++] = elements[i++];
-        }
-
-        while (j < end) {
-            temp[index++] = elements[j++];
-        }
+        sb.append(']');
+        return sb.toString();
     }
 
     /**
@@ -317,6 +345,8 @@ public class CustomArrayList<E> implements CustomList<E> {
      */
     private void increaseCapacity() {
         int newCapacity = elements.length * 2;
-        elements = Arrays.copyOf(elements, newCapacity);
+        Object[] newElements = new Object[newCapacity];
+        System.arraycopy(elements, 0, newElements, 0, elements.length);
+        elements = newElements;
     }
 }

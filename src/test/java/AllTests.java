@@ -5,6 +5,6 @@ import org.junit.platform.suite.api.Suite;
 
 @Suite
 @SelectClasses({CustomArrayListTest.class, CustomLinkedListTest.class})
-public class AllTests {
+class AllTests {
 
 }
